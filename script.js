@@ -1,13 +1,32 @@
-document.getElementById("generate-btn").addEventListener("click", function () {
-  const input = document.getElementById("qr-input").value;
-  if (input.trim() === "") {
-    alert("Please enter text or URL");
-    return;
+let startTime;
+let timerInterval;
+let isRunning = false;
+
+document.getElementById("input").addEventListener("input", function () {
+  if (!isRunning) {
+    startTime = Date.now();
+    timerInterval = setInterval(updateTime, 1000);
+    isRunning = true;
   }
-  document.getElementById("qr-code").innerHTML = "";
-  new QRCode(document.getElementById("qr-code"), {
-    text: input,
-    width: 200,
-    height: 200,
-  });
+  const inputText = this.value;
+  const originalText = document.getElementById("text").textContent;
+  if (inputText === originalText) {
+    clearInterval(timerInterval);
+    const timeTaken = (Date.now() - startTime) / 1000;
+    const wpm = Math.round((originalText.split(" ").length / timeTaken) * 60);
+    document.getElementById("wpm").textContent = wpm;
+  }
+});
+
+function updateTime() {
+  const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+  document.getElementById("time").textContent = timeElapsed;
+}
+
+document.getElementById("reset-btn").addEventListener("click", function () {
+  clearInterval(timerInterval);
+  document.getElementById("input").value = "";
+  document.getElementById("time").textContent = "0";
+  document.getElementById("wpm").textContent = "0";
+  isRunning = false;
 });
